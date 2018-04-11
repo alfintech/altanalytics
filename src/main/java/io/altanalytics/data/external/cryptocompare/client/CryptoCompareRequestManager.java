@@ -22,7 +22,7 @@ public class CryptoCompareRequestManager {
 
 		List<IntervalPrice> results = new ArrayList<IntervalPrice>();
 		List<Future<IntervalPrice>> futures = new ArrayList<Future<IntervalPrice>>();
-		ExecutorService service = new ForkJoinPool(10);
+		ExecutorService service = new ForkJoinPool(25);
 		
 		for(IntervalPriceRequest request : requests) {
 			CryptoCompareRequestConsumer consumer = new CryptoCompareRequestConsumer(client, request);
@@ -30,7 +30,11 @@ public class CryptoCompareRequestManager {
 		}
 		
 		for(Future<IntervalPrice> future : futures)  {
+			try {
 			results.add(future.get());
+			} catch(Exception e) {
+				System.out.println(">>>>>abc");
+			}
 		}
 
 		return results;

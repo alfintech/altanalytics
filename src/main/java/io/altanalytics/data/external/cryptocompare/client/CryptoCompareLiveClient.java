@@ -80,8 +80,12 @@ public class CryptoCompareLiveClient implements CryptoCompareClient {
 	private Double parseNumber(Object number) {
 		if(number instanceof Double) {
 			return (Double) number;	
-		} else {
+		} else if(number instanceof Long) {
 			return new Double((Long) number);
+		} else if(number instanceof String) {
+			return new Double((String) number);
+		} else {
+			throw new IllegalArgumentException("Cannot parse number of type " +number.getClass());
 		}
 	}
 

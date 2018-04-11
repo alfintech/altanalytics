@@ -30,7 +30,7 @@ import io.altanalytics.domain.currency.CurrencyPair;
 import io.altanalytics.domain.currency.IntervalPrice;
 import io.altanalytics.persistence.Reader;
 
-@Component
+//@Component
 public class ElasticReader implements Reader {
 
 	@Value("${elastic.cluster.name}")
@@ -59,8 +59,7 @@ public class ElasticReader implements Reader {
 		client.addTransportAddress(new TransportAddress(InetAddress.getByName(elasticHost), elasticPort));
 	}
 
-	@Override
-	public IntervalPrice getIntervalPrice(CurrencyPair currencyPair) throws Exception {
+	public IntervalPrice getLatestIntervalPrice(CurrencyPair currencyPair) throws Exception {
 		
 		SearchResponse response = client.prepareSearch("marketdata")
 				.setTypes("minutely")

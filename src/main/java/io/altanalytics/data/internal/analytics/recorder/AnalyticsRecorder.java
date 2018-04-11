@@ -24,7 +24,7 @@ import io.altanalytics.util.DateUtil;
 @EnableScheduling
 @Component
 public class AnalyticsRecorder {
-	
+
 	@Value("${recorder.analytics.active}")
 	private boolean active;
 
@@ -50,25 +50,28 @@ public class AnalyticsRecorder {
 
 			Date analyticsEndDate = DateUtil.now();
 			Date analyticsStartDate = DateUtil.shiftToPast(analyticsEndDate, interval);
-			
+
 			List<Analytic> analytics = new ArrayList<Analytic>();
 			for(CurrencyPair currencyPair : currencyPairs) {
-				
+
 				//Volume calcs
 				List<IntervalPrice> intervalPrices = reader.getIntervalPrices(analyticsStartDate, analyticsEndDate, currencyPair);
-				BigDecimal intervalVolume = VolumeCalculator.cumulative(intervalPrices);
-				BigDecimal dayVolume = intervalPrices.get(0).getDayVolume();
-				BigDecimal dayAverageVolume = VolumeCalculator.average(dayVolume, interval);
-				BigDecimal percentageVolume = BigDecimalUtil.multiply(BigDecimalUtil.divide(intervalVolume, dayAverageVolume), new BigDecimal(100));
-				
-				//ATH % calcs
-				BigDecimal allTimeHigh = reader.getAllTimeHigh(currencyPair).getClose();
-				BigDecimal currentPrice = intervalPrices.get(intervalPrices.size()-1).getClose();
-				BigDecimal percentageATH = BigDecimalUtil.divide(currentPrice, allTimeHigh);
-				
-				
-				Analytic analytic = new Analytic(currencyPair, intervalVolume, dayAverageVolume, percentageVolume, percentageATH, analyticsEndDate);
-				analytics.add(analytic);
+
+				if(!intervalPrices.isEmpty()) {
+					BigDecimal intervalVolume = VolumeCalculator.cumulative(intervalPrices);
+					BigDecimal dayVolume = intervalPrices.get(0).getDayVolume();
+					BigDecimal dayAverageVolume = VolumeCalculator.average(dayVolume, interval);
+					BigDecimal percentageVolume = BigDecimalUtil.multiply(BigDecimalUtil.divide(intervalVolume, dayAverageVolume), new BigDecimal(100));
+
+					//ATH % calcs
+					BigDecimal allTimeHigh = reader.getAllTimeHigh(currencyPair).getClose();
+					BigDecimal currentPrice = intervalPrices.get(intervalPrices.size()-1).getClose();
+					BigDecimal percentageATH = BigDecimalUtil.divide(currentPrice, allTimeHigh);
+
+
+					Analytic analytic = new Analytic(currencyPair, intervalVolume, dayAverageVolume, percentageVolume, percentageATH, analyticsEndDate);
+					analytics.add(analytic);
+				}
 			}
 			publisher.publishAnalytics(analytics);
 

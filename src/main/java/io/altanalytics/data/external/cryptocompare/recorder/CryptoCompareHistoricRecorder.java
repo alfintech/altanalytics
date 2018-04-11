@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -24,6 +26,8 @@ import io.altanalytics.util.DateUtil;
 @EnableScheduling
 @Component
 public class CryptoCompareHistoricRecorder extends AbstractCryptoCompareRecorder {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CryptoCompareHistoricRecorder.class);
 
 	private static final long HOURS_IN_YEAR = 365 * 24;
 	private static final long SECONDS_IN_HOUR = 60 * 60;
@@ -49,10 +53,16 @@ public class CryptoCompareHistoricRecorder extends AbstractCryptoCompareRecorder
 		Date datetimeToRetrieve = startOfThisHour();
 
 		for(int i=0; i<HOURS_IN_YEAR; i++) {
+			LOG.info("Triggered historic pricing recorder");
+			long checkpoint1 = Calendar.getInstance().getTimeInMillis();
 			datetimeToRetrieve = DateUtil.shiftToPast(datetimeToRetrieve, MILLISECONDS_IN_HOUR);
 			List<IntervalPriceRequest> requests = requestsForCurrencyPairs(currencyPairs, datetimeToRetrieve);
 			List<IntervalPrice> intervalPrices = fetch(marketDataClient, requests);
-			publish(interpolate(intervalPrices));
+			long checkpoint2 = Calendar.getInstance().getTimeInMillis();
+//			publish(interpolate(intervalPrices));
+			publish(intervalPrices);
+			long checkpoint3 = Calendar.getInstance().getTimeInMillis();
+			LOG.info("For historic date " +datetimeToRetrieve+ " retrieved " +currencyPairs.size()+ " currencies in " +(checkpoint2-checkpoint1)+ "ms. Published in " +(checkpoint3-checkpoint2)+ "ms. Total in " +(checkpoint3-checkpoint1)+ "ms");
 
 		}
 	}

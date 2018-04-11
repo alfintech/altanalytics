@@ -27,9 +27,9 @@ public class CryptoCompareRequestConsumer implements Callable<IntervalPrice> {
 			IntervalPrice intervalPrice = client.fetch(request);
 			return intervalPrice;
 		} catch (Exception e) {
+			retryCount++;
 			if(retryCount < RETRY_THRESHOLD) {
 				LOG.warn("Retrying request: " +request);
-				retryCount++;
 				return call();
 			} else {
 				LOG.error("Cannot record data for request" +request+ ". " +e.getMessage());

@@ -29,7 +29,7 @@ import io.altanalytics.persistence.Publisher;
 import io.altanalytics.domain.currency.Analytic;
 import io.altanalytics.util.BigDecimalUtil;
 
-@Component
+//@Component
 public class ElasticPublisher implements Publisher {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticPublisher.class);

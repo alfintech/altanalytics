@@ -32,7 +32,6 @@ public class CryptoCompareRequestConsumer implements Callable<IntervalPrice> {
 				LOG.warn("Retrying request: " +request);
 				return call();
 			} else {
-				LOG.error("Cannot record data for request" +request+ ". " +e.getMessage());
 				throw new RuntimeException();
 			}
 		}

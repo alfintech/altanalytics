@@ -7,10 +7,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
+import org.apache.log4j.Logger;
+
 import io.altanalytics.domain.currency.IntervalPrice;
 import io.altanalytics.domain.currency.IntervalPriceRequest;
 
 public class CryptoCompareRequestManager {
+
+	private static final Logger LOG = Logger.getLogger(CryptoCompareRequestManager.class);
 
 	private CryptoCompareClient client;
 
@@ -33,7 +37,7 @@ public class CryptoCompareRequestManager {
 			try {
 			results.add(future.get());
 			} catch(Exception e) {
-				System.out.println(">>>>>abc");
+				//Do nothing as this is logged in the consumer
 			}
 		}
 

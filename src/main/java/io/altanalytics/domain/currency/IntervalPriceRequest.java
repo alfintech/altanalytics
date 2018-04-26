@@ -4,16 +4,16 @@ import java.util.Date;
 
 public class IntervalPriceRequest {
 
-	private CurrencyPair currencyPair;
+	private String currency;
 	private Date date;
 	
-	public IntervalPriceRequest(CurrencyPair currencyPair, Date date) {
-		this.currencyPair = currencyPair;
+	public IntervalPriceRequest(String currency, Date date) {
+		this.currency = currency;
 		this.date = date;
 	}
 	
-	public CurrencyPair getCurrencyPair() {
-		return currencyPair;
+	public String getCurrency() {
+		return currency;
 	}
 	public Date getDate() {
 		return date;
@@ -21,7 +21,7 @@ public class IntervalPriceRequest {
 
 	@Override
 	public String toString() {
-		return "MarketDataRequest [currencyPair=" + currencyPair + ", date=" + date + "]";
+		return "MarketDataRequest [currency=" + currency + ", date=" + date + "]";
 	}
 	
 }

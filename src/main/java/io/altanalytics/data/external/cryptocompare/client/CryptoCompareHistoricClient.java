@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.util.concurrent.RateLimiter;
 
 import io.altanalytics.data.external.common.HttpConnectionManager;
-import io.altanalytics.domain.currency.CurrencyPair;
 import io.altanalytics.domain.currency.IntervalPrice;
 import io.altanalytics.domain.currency.IntervalPriceRequest;
 
@@ -48,6 +47,7 @@ public class CryptoCompareHistoricClient implements CryptoCompareClient {
 	private static final String JSON_FIELD_DATA_OPEN_TIME = "TimeFrom";
 	private static final String JSON_FIELD_DATA_CLOSE_TIME = "TimeTo";
 	private static final String SITE_ID = "altanalyticsio";
+	private static final String DEFAULT_BASE_CURRENCY = "BTC";
 
 	private static final long MS_IN_SEC = 1000;
 	
@@ -59,9 +59,13 @@ public class CryptoCompareHistoricClient implements CryptoCompareClient {
 	}
 	
 	public IntervalPrice fetch(IntervalPriceRequest request) throws Exception {
+		return fetch(request, DEFAULT_BASE_CURRENCY);
+	}
+	
+	public IntervalPrice fetch(IntervalPriceRequest request, String baseCurrency) throws Exception {
 
 		rateLimiter.acquire();
-		String requestURL = String.format(REST_URL_TEMPLATE, request.getCurrencyPair().tradeCurrency, request.getCurrencyPair().baseCurrency, convertToEpochSeconds(request.getDate()), SITE_ID);
+		String requestURL = String.format(REST_URL_TEMPLATE, request.getCurrency(), DEFAULT_BASE_CURRENCY, convertToEpochSeconds(request.getDate()), SITE_ID);
 		HttpGet httpRequest = new HttpGet(requestURL);
 		
 		CloseableHttpClient httpClient = connectionManager.getHttpConnection();
@@ -70,11 +74,13 @@ public class CryptoCompareHistoricClient implements CryptoCompareClient {
 		httpResponse.close();
 
 		try {
-			return parseResponse(request.getCurrencyPair(), response);
+			return parseResponse(request.getCurrency(), response);
 		} catch(Exception e) {
 			throw new RuntimeException("Failed to parse response: " + response);
 		}
 	}
+	
+	
 
 	private String read(HttpResponse response) throws IOException {
 		if (response.getStatusLine().getStatusCode() != 200) {
@@ -88,7 +94,7 @@ public class CryptoCompareHistoricClient implements CryptoCompareClient {
 		return date.getTime() / 1000;
 	}
 
-	private IntervalPrice parseResponse(CurrencyPair currencyPair, String response) throws IOException, ParseException {
+	private IntervalPrice parseResponse(String currency, String response) throws IOException, ParseException {
 
 		JSONParser jsonParser = new JSONParser();
 		JSONObject jsonObject = (JSONObject) jsonParser.parse(response);
@@ -105,7 +111,7 @@ public class CryptoCompareHistoricClient implements CryptoCompareClient {
 		Double close = parseNumber(dataRecord.get(JSON_FIELD_DATA_CLOSE));
 		Double open = parseNumber(dataRecord.get(JSON_FIELD_DATA_OPEN));
 
-		return new IntervalPrice(currencyPair, new Date(openEpochTime), new Date(closeEpochTime), new BigDecimal(open), new BigDecimal(low), new BigDecimal(high), new BigDecimal(close), new BigDecimal(volume), new BigDecimal(volume));
+		return new IntervalPrice(currency, new Date(openEpochTime), new Date(closeEpochTime), new BigDecimal(open), new BigDecimal(low), new BigDecimal(high), new BigDecimal(close), new BigDecimal(volume), new BigDecimal(volume));
 	}
 
 	private Double parseNumber(Object number) {

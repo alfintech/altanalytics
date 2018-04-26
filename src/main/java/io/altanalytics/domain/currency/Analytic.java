@@ -9,13 +9,13 @@ public class Analytic {
 	private BigDecimal dayAverage;
 	private BigDecimal percentageVolume;
 	private BigDecimal percentageAllTimeHigh;
-	private CurrencyPair currencyPair;
+	private String currency;
 	private Date date;
 	
-	public Analytic(CurrencyPair currencyPair, BigDecimal intervalVolume, BigDecimal dayAverage, BigDecimal percentageVolume, BigDecimal percentageAllTimeHigh, Date date) {
+	public Analytic(String currency, BigDecimal intervalVolume, BigDecimal dayAverage, BigDecimal percentageVolume, BigDecimal percentageAllTimeHigh, Date date) {
 		this.intervalVolume = intervalVolume;
 		this.dayAverage = dayAverage;
-		this.currencyPair = currencyPair;
+		this.currency = currency;
 		this.percentageVolume = percentageVolume;
 		this.percentageAllTimeHigh = percentageAllTimeHigh;
 		this.date = date;
@@ -37,8 +37,8 @@ public class Analytic {
 		return percentageAllTimeHigh;
 	}
 
-	public CurrencyPair getCurrencyPair() {
-		return currencyPair;
+	public String getCurrency() {
+		return currency;
 	}
 	
 	public Date getDate() {
@@ -49,7 +49,7 @@ public class Analytic {
 	public String toString() {
 		return "Analytic [intervalVolume=" + intervalVolume + ", dayAverage=" + dayAverage
 				+ ", percentageVolume=" + percentageVolume + ", percentageAllTimeHigh=" + percentageAllTimeHigh
-				+ ", currencyPair=" + currencyPair + ", date=" + date + "]";
+				+ ", currency=" + currency + ", date=" + date + "]";
 	}
 
 }

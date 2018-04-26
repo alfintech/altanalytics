@@ -5,6 +5,8 @@ import java.util.Date;
 
 public class DateUtil {
 
+	public static long SEC_MS = 1000;
+	public static long MIN_MS = 60 * SEC_MS;
 
 	public static Date intervalStart(long interval) {
 		Calendar currentTime = Calendar.getInstance();

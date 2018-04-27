@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import io.altanalytics.data.external.cryptocompare.client.CryptoCompareClient;
 import io.altanalytics.data.external.cryptocompare.client.CryptoCompareRequestManager;
-import io.altanalytics.domain.currency.CurrencyPair;
 import io.altanalytics.domain.currency.IntervalPrice;
 import io.altanalytics.domain.currency.IntervalPriceRequest;
 import io.altanalytics.persistence.Publisher;
@@ -19,18 +18,15 @@ public abstract class AbstractCryptoCompareRecorder {
 	@Autowired
 	protected Publisher publisher;
 
-	@Value("${recorder.currencies.trade}")
-	protected String[] tradeCurrencies;
+	@Value("${recorder.currencies}")
+	protected String[] currencies;
 
-	@Value("${recorder.currencies.base}")
-	protected String[] baseCurrencies;
-
-	protected List<IntervalPriceRequest> requestsForCurrencyPairs(List<CurrencyPair> currencyPairs, Date date) {
+	protected List<IntervalPriceRequest> requestsForCurrencyPairs(String[] currencies, Date date) {
 		
 		List<IntervalPriceRequest> requests = new ArrayList<IntervalPriceRequest>();
 		
-		for(CurrencyPair currencyPair : currencyPairs) {
-			requests.add(new IntervalPriceRequest(currencyPair, date));
+		for(String currency : currencies) {
+			requests.add(new IntervalPriceRequest(currency, date));
 		}
 
 		return requests;
@@ -41,8 +37,14 @@ public abstract class AbstractCryptoCompareRecorder {
 		return marketDataRequestManager.fetch(marketDataRequests);
 	}
 	
-	protected void publish(List<IntervalPrice> marketDataList) throws Exception {
-		publisher.publishMarketData(marketDataList);		
+	protected void publish(List<IntervalPrice> prices) throws Exception {
+		publisher.publishMarketData(prices);		
+	}
+
+	protected void publish(IntervalPrice price) throws Exception {
+		List<IntervalPrice> prices = new ArrayList<IntervalPrice>();
+		prices.add(price);
+		publisher.publishMarketData(prices);		
 	}
 
 }

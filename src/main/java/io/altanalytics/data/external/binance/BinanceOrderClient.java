@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 
 import com.binance.api.client.domain.market.OrderBookEntry;
 
-import io.altanalytics.domain.currency.CurrencyPair;
 import io.altanalytics.domain.currency.Order;
 
 public class BinanceOrderClient extends AbstractBinanceClient {
@@ -24,24 +23,24 @@ public class BinanceOrderClient extends AbstractBinanceClient {
 		super(credentials);
 	}
 
-	public synchronized List<Order> getAsks(CurrencyPair pair) {
+	public synchronized List<Order> getAsks(String tradeCurrency, String baseCurrency) {
 
-		List<OrderBookEntry> orderBook = client.getOrderBook(pair.toString(), ORDER_BOOK_DEPTH).getAsks();
+		List<OrderBookEntry> orderBook = client.getOrderBook(tradeCurrency+baseCurrency, ORDER_BOOK_DEPTH).getAsks();
 		return convertToOrders(orderBook);
 	}
 
-	public synchronized List<Order> getBids(CurrencyPair pair) {
+	public synchronized List<Order> getBids(String tradeCurrency, String baseCurrency) {
 
-		List<OrderBookEntry> orderBook = client.getOrderBook(pair.toString(), ORDER_BOOK_DEPTH).getBids();
+		List<OrderBookEntry> orderBook = client.getOrderBook(tradeCurrency+baseCurrency, ORDER_BOOK_DEPTH).getBids();
 		return convertToOrders(orderBook);
 	}
 
-	public void buy(BigDecimal quantity, CurrencyPair pair, BigDecimal currentPrice) {
-		LOG.info("Buying " +pair+ ":" +quantity+ "@" +currentPrice.doubleValue());
+	public void buy(BigDecimal quantity, String tradeCurrency, String baseCurrency, BigDecimal currentPrice) {
+		LOG.info("Buying " +tradeCurrency+baseCurrency+ ":" +quantity+ "@" +currentPrice.doubleValue());
 	}
 
-	public void sell(BigDecimal quantity, CurrencyPair pair, BigDecimal currentPrice) {
-		LOG.info("Selling " +pair+ ":" +quantity+ "@" +currentPrice.doubleValue());
+	public void sell(BigDecimal quantity, String tradeCurrency, String baseCurrency, BigDecimal currentPrice) {
+		LOG.info("Selling " +tradeCurrency+baseCurrency+ ":" +quantity+ "@" +currentPrice.doubleValue());
 	}
 
 	private List<Order> convertToOrders(List<OrderBookEntry> orderBook) {

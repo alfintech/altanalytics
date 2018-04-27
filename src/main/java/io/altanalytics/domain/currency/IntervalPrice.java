@@ -5,18 +5,19 @@ import java.util.Date;
 
 public class IntervalPrice implements Comparable<IntervalPrice>{
 
-	private CurrencyPair currencyPair;
+	private String currency;
 	private Date openTime;
 	private Date closeTime;
 	private BigDecimal open;
 	private BigDecimal low;
 	private BigDecimal high;
 	private BigDecimal close;
+	private BigDecimal closeUSD;
 	private BigDecimal intervalVolume;
 	private BigDecimal dayVolume;
 
-	public IntervalPrice(CurrencyPair currencyPair, Date openTime, Date closeTime, BigDecimal open, BigDecimal close, BigDecimal low, BigDecimal high, BigDecimal intervalVolume, BigDecimal dayVolume) {
-		this.currencyPair = currencyPair;
+	public IntervalPrice(String currency, Date openTime, Date closeTime, BigDecimal open, BigDecimal close, BigDecimal low, BigDecimal high, BigDecimal intervalVolume, BigDecimal dayVolume) {
+		this.currency = currency;
 		this.openTime = openTime;
 		this.closeTime = closeTime;
 		this.open = open;
@@ -27,8 +28,8 @@ public class IntervalPrice implements Comparable<IntervalPrice>{
 		this.dayVolume = dayVolume;
 	}
 
-	public CurrencyPair getCurrencyPair() {
-		return currencyPair;
+	public String getCurrency() {
+		return currency;
 	}
 	
 	public Date getOpenTime() {
@@ -63,6 +64,14 @@ public class IntervalPrice implements Comparable<IntervalPrice>{
 		return dayVolume;
 	}
 
+	public BigDecimal getCloseUSD() {
+		return closeUSD;
+	}
+
+	public void setCloseUSD(BigDecimal closeUSD) {
+		this.closeUSD = closeUSD;
+	}
+
 	@Override
 	public int compareTo(IntervalPrice marketData) {
 		return this.openTime.compareTo(marketData.getOpenTime());
@@ -70,7 +79,7 @@ public class IntervalPrice implements Comparable<IntervalPrice>{
 
 	@Override
 	public String toString() {
-		return "MarketData [currencyPair=" + currencyPair + ", openTime=" + openTime + ", closeTime=" + closeTime
+		return "MarketData [currency=" + currency + ", openTime=" + openTime + ", closeTime=" + closeTime
 				+ ", open=" + open + ", low=" + low + ", high=" + high + ", close=" + close 
 				+ ", intervalVolume=" + intervalVolume + ", dayVolume=" + dayVolume+ "]";
 	}

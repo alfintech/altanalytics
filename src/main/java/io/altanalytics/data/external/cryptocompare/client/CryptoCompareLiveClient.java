@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.altanalytics.data.external.common.HttpConnectionManager;
-import io.altanalytics.domain.currency.CurrencyPair;
 import io.altanalytics.domain.currency.IntervalPrice;
 import io.altanalytics.domain.currency.IntervalPriceRequest;
 
@@ -34,10 +33,17 @@ public class CryptoCompareLiveClient implements CryptoCompareClient {
 	private static final String JSON_FIELD_DATA_DAY_VOLUME = "VOLUME24HOUR";
 	private static final String JSON_FIELD_DATA_PRICE = "PRICE";
 	private static final String SITE_ID = "altanalyticsio";
+	private static final String DEFAULT_BASE_CURRENCY = "BTC";
+
 
 	public IntervalPrice fetch(IntervalPriceRequest request) throws Exception {
 
-		String requestURL = String.format(REST_URL_TEMPLATE, request.getCurrencyPair().tradeCurrency, request.getCurrencyPair().baseCurrency, SITE_ID);
+		return fetch(request, DEFAULT_BASE_CURRENCY);
+	}
+	
+	public IntervalPrice fetch(IntervalPriceRequest request, String baseCurrency) throws Exception {
+
+		String requestURL = String.format(REST_URL_TEMPLATE, request.getCurrency(), baseCurrency, SITE_ID);
 		HttpGet httpRequest = new HttpGet(requestURL);
 		
 		CloseableHttpClient httpClient = connectionManager.getHttpConnection();
@@ -46,13 +52,13 @@ public class CryptoCompareLiveClient implements CryptoCompareClient {
 		httpResponse.close();
 
 		try {
-			return parseResponse(request.getCurrencyPair(), response);
+			return parseResponse(request.getCurrency(), baseCurrency, response);
 		} catch(Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Failed to parse response: " + response);
 		}
 	}
-
+	
 	private String read(HttpResponse response) throws IOException {
 		if (response.getStatusLine().getStatusCode() != 200) {
 			throw new RuntimeException("Failed : HTTP error code : " + read(response));
@@ -61,20 +67,21 @@ public class CryptoCompareLiveClient implements CryptoCompareClient {
 		return IOUtils.toString(new InputStreamReader(response.getEntity().getContent()));
 	}
 
-	private IntervalPrice parseResponse(CurrencyPair currencyPair, String response) throws IOException, ParseException {
+	private IntervalPrice parseResponse(String currency, String baseCurrency, String response) throws IOException, ParseException {
 
 		JSONParser jsonParser = new JSONParser();
 		JSONObject jsonObject = (JSONObject) jsonParser.parse(response);
 
 		JSONObject data = (JSONObject) jsonObject.get(JSON_FIELD_DATA);
-		JSONObject nestedtradeCurrencyRecord =  (JSONObject) data.get(currencyPair.tradeCurrency);
-		JSONObject nestedBaseCurrencyRecord =  (JSONObject) nestedtradeCurrencyRecord.get(currencyPair.baseCurrency);
+		JSONObject nestedtradeCurrencyRecord =  (JSONObject) data.get(currency);
+		JSONObject nestedBaseCurrencyRecord =  (JSONObject) nestedtradeCurrencyRecord.get(baseCurrency);
 
+		
 		Double volume = parseNumber(nestedBaseCurrencyRecord.get(JSON_FIELD_DATA_DAY_VOLUME)); 
 		Double price = parseNumber(nestedBaseCurrencyRecord.get(JSON_FIELD_DATA_PRICE));
 		Date date = Calendar.getInstance().getTime();
 
-		return new IntervalPrice(currencyPair, date, date, new BigDecimal(price), new BigDecimal(price), new BigDecimal(price), new BigDecimal(price), new BigDecimal(volume), new BigDecimal(volume));
+		return new IntervalPrice(currency, date, date, new BigDecimal(price), new BigDecimal(price), new BigDecimal(price), new BigDecimal(price), new BigDecimal(volume), new BigDecimal(volume));
 	}
 
 	private Double parseNumber(Object number) {

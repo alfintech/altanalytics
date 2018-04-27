@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -98,7 +100,7 @@ public class CryptoCompareSocialMediaClient {
     private int numberOfRetryAttempts = 3;
 
 
-    public SocialStats fetch(long coinId) throws Exception {
+    public SocialStats fetch(Integer coinId) throws Exception {
 
         String requestURL = REST_URL_TEMPLATE + coinId;
         HttpGet httpRequest = new HttpGet(requestURL);
@@ -162,8 +164,9 @@ public class CryptoCompareSocialMediaClient {
         JSONObject general = (JSONObject) data.get(JSON_FIELD_DATA_GENERAL);
         String generalName = (String) general.get(JSON_FIELD_DATA_GENERAL_NAME);
         long generalPoints = (long) general.get(JSON_FIELD_DATA_GENERAL_POINTS);
+        Long timeStampLong = System.currentTimeMillis();
 
-        return new GeneralStats(generalName, generalPoints);
+        return new GeneralStats(generalName, generalPoints, timeStampLong);
     }
 
     private FacebookStats getFacebookStats(JSONObject data) {

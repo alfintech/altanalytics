@@ -16,39 +16,37 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import io.altanalytics.data.external.cryptocompare.client.CryptoCompareLiveClient;
-import io.altanalytics.domain.currency.CurrencyPair;
 import io.altanalytics.domain.currency.IntervalPrice;
 import io.altanalytics.domain.currency.IntervalPriceRequest;
 import io.altanalytics.util.BigDecimalUtil;
-import io.altanalytics.util.CurrencyPairUtil;
 import io.altanalytics.util.DateUtil;
+import io.altanalytics.util.PriceUtil;
 
 @EnableScheduling
 @Component
-public class CryptoCompareLiveRecorder extends AbstractCryptoCompareRecorder {
+public class CryptoCompareAltsLiveRecorder extends AbstractCryptoCompareRecorder {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CryptoCompareLiveRecorder.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CryptoCompareAltsLiveRecorder.class);
 	
-	@Value("${recorder.live.active}")
+	@Value("${recorder.live.alts.active}")
 	private boolean active;
 
-	@Value("${recorder.live.interval}")
+	@Value("${recorder.live.alts.interval}")
 	private int interval;
 
-	private Map<CurrencyPair, IntervalPrice> currentMarketData = new HashMap<CurrencyPair, IntervalPrice>();
+	private Map<String, IntervalPrice> currentMarketData = new HashMap<String, IntervalPrice>();
 
 	@Autowired
 	public CryptoCompareLiveClient marketDataClient;
 
-	@Scheduled(cron = "${recorder.live.schedule}")
+	@Scheduled(cron = "${recorder.live.alts.schedule}")
 	public void tick() throws Exception {
 		if(active) {
 			LOG.info("Triggered live pricing recorder");
 			long checkpoint1 = Calendar.getInstance().getTimeInMillis();
 			Date requestDate = DateUtil.intervalStart(interval);
-			List<CurrencyPair> currencyPairs = CurrencyPairUtil.constructCurrencyPairs(tradeCurrencies, baseCurrencies);
 
-			List<IntervalPriceRequest> requests = requestsForCurrencyPairs(currencyPairs, requestDate);
+			List<IntervalPriceRequest> requests = requestsForCurrencyPairs(currencies, requestDate);
 			List<IntervalPrice> latestIntervalPrices = fetch(marketDataClient, requests);
 			List<IntervalPrice> deltas = delta(latestIntervalPrices, requestDate);
 			long checkpoint2 = Calendar.getInstance().getTimeInMillis();
@@ -56,7 +54,7 @@ public class CryptoCompareLiveRecorder extends AbstractCryptoCompareRecorder {
 				publish(deltas);
 			}
 			long checkpoint3 = Calendar.getInstance().getTimeInMillis();
-			LOG.info("Retrieved " +currencyPairs.size()+ " currencies in " +(checkpoint2-checkpoint1)+ "ms. Published in " +(checkpoint3-checkpoint2)+ "ms. Total in " +(checkpoint3-checkpoint1)+ "ms");
+			LOG.info("Retrieved " +currencies.length+ " currencies in " +(checkpoint2-checkpoint1)+ "ms. Published in " +(checkpoint3-checkpoint2)+ "ms. Total in " +(checkpoint3-checkpoint1)+ "ms");
 		}
 	}
 
@@ -65,11 +63,11 @@ public class CryptoCompareLiveRecorder extends AbstractCryptoCompareRecorder {
 		List<IntervalPrice> deltas = new ArrayList<IntervalPrice>();
 
 		for(IntervalPrice latestIntervalPrice : latestIntervalPrices) {
-			if(currentMarketData.containsKey(latestIntervalPrice.getCurrencyPair())) {
-				IntervalPrice delta = delta(latestIntervalPrice, currentMarketData.get(latestIntervalPrice.getCurrencyPair()));
+			if(currentMarketData.containsKey(latestIntervalPrice.getCurrency())) {
+				IntervalPrice delta = delta(latestIntervalPrice, currentMarketData.get(latestIntervalPrice.getCurrency()));
 				deltas.add(delta);
 			}
-			currentMarketData.put(latestIntervalPrice.getCurrencyPair(), latestIntervalPrice);
+			currentMarketData.put(latestIntervalPrice.getCurrency(), latestIntervalPrice);
 		}
 
 		return deltas;
@@ -78,7 +76,7 @@ public class CryptoCompareLiveRecorder extends AbstractCryptoCompareRecorder {
 	private IntervalPrice delta(IntervalPrice latestIntervalPrice, IntervalPrice priorIntervalPrice) {
 
 		IntervalPrice delta = new IntervalPrice(
-				latestIntervalPrice.getCurrencyPair(), 
+				latestIntervalPrice.getCurrency(), 
 				DateUtil.intervalStart(interval),
 				DateUtil.intervalEnd(interval),
 				priorIntervalPrice.getClose(), 
@@ -87,6 +85,8 @@ public class CryptoCompareLiveRecorder extends AbstractCryptoCompareRecorder {
 				latestIntervalPrice.getClose(),
 				BigDecimalUtil.subtractToZero(latestIntervalPrice.getIntervalVolume(), priorIntervalPrice.getIntervalVolume()),
 				latestIntervalPrice.getDayVolume());
+
+		delta.setCloseUSD(PriceUtil.convertToBTC(delta.getClose()));
 
 		return delta;
 	}

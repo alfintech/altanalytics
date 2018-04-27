@@ -16,11 +16,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import io.altanalytics.data.external.cryptocompare.client.CryptoCompareHistoricClient;
-import io.altanalytics.domain.currency.CurrencyPair;
 import io.altanalytics.domain.currency.IntervalPrice;
 import io.altanalytics.domain.currency.IntervalPriceRequest;
 import io.altanalytics.util.BigDecimalUtil;
-import io.altanalytics.util.CurrencyPairUtil;
 import io.altanalytics.util.DateUtil;
 
 @EnableScheduling
@@ -49,20 +47,19 @@ public class CryptoCompareHistoricRecorder extends AbstractCryptoCompareRecorder
 
 	public void process() throws Exception {
 
-		List<CurrencyPair> currencyPairs = CurrencyPairUtil.constructCurrencyPairs(tradeCurrencies, baseCurrencies);
 		Date datetimeToRetrieve = startOfThisHour();
 
 		for(int i=0; i<HOURS_IN_YEAR; i++) {
 			LOG.info("Triggered historic pricing recorder");
 			long checkpoint1 = Calendar.getInstance().getTimeInMillis();
 			datetimeToRetrieve = DateUtil.shiftToPast(datetimeToRetrieve, MILLISECONDS_IN_HOUR);
-			List<IntervalPriceRequest> requests = requestsForCurrencyPairs(currencyPairs, datetimeToRetrieve);
+			List<IntervalPriceRequest> requests = requestsForCurrencyPairs(currencies, datetimeToRetrieve);
 			List<IntervalPrice> intervalPrices = fetch(marketDataClient, requests);
 			long checkpoint2 = Calendar.getInstance().getTimeInMillis();
 //			publish(interpolate(intervalPrices));
 			publish(intervalPrices);
 			long checkpoint3 = Calendar.getInstance().getTimeInMillis();
-			LOG.info("For historic date " +datetimeToRetrieve+ " retrieved " +currencyPairs.size()+ " currencies in " +(checkpoint2-checkpoint1)+ "ms. Published in " +(checkpoint3-checkpoint2)+ "ms. Total in " +(checkpoint3-checkpoint1)+ "ms");
+			LOG.info("For historic date " +datetimeToRetrieve+ " retrieved " +currencies.length+ " currencies in " +(checkpoint2-checkpoint1)+ "ms. Published in " +(checkpoint3-checkpoint2)+ "ms. Total in " +(checkpoint3-checkpoint1)+ "ms");
 
 		}
 	}
@@ -96,7 +93,7 @@ public class CryptoCompareHistoricRecorder extends AbstractCryptoCompareRecorder
 			Date openTime = new Date(slidingWindow.getTime());
 			slidingWindow = DateUtil.shiftToFuture(openTime, MS_IN_TEN_SECS);
 			Date closeTime = new Date(slidingWindow.getTime());
-			interpolated.add(new IntervalPrice(marketData.getCurrencyPair(), openTime, closeTime, marketData.getOpen(), marketData.getClose(), marketData.getLow(), marketData.getHigh(), BigDecimalUtil.divide(marketData.getIntervalVolume(), new BigDecimal(SECONDS_IN_HOUR)), BigDecimal.ZERO));
+			interpolated.add(new IntervalPrice(marketData.getCurrency(), openTime, closeTime, marketData.getOpen(), marketData.getClose(), marketData.getLow(), marketData.getHigh(), BigDecimalUtil.divide(marketData.getIntervalVolume(), new BigDecimal(SECONDS_IN_HOUR)), BigDecimal.ZERO));
 		}
 
 		return interpolated;

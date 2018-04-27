@@ -7,4 +7,6 @@ public interface CryptoCompareClient {
 
 	public IntervalPrice fetch(IntervalPriceRequest request) throws Exception;
 
+	public IntervalPrice fetch(IntervalPriceRequest request, String baseCurrency) throws Exception;
+
 }

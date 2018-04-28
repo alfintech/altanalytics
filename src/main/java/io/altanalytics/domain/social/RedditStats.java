@@ -1,5 +1,7 @@
 package io.altanalytics.domain.social;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -9,7 +11,7 @@ public class RedditStats {
 
     private long subscribers;
     private long activeUsers;
-    private Date communityCreation;
+    private Date communityCreationDate;
     private double postsPerHour;
     private double postsPerDay;
     private double commentsPerHour;
@@ -17,10 +19,12 @@ public class RedditStats {
     private long points;
     private String link;
 
-    public RedditStats(long subscribers, long activeUsers, Date communityCreation, double postsPerHour, double postsPerDay, double commentsPerHour, double commentsPerDay, String link, long points) {
+    private DateFormat socialStatsDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+    public RedditStats(long subscribers, long activeUsers, Date communityCreationDate, double postsPerHour, double postsPerDay, double commentsPerHour, double commentsPerDay, String link, long points) {
         this.subscribers = subscribers;
         this.activeUsers = activeUsers;
-        this.communityCreation = communityCreation;
+        this.communityCreationDate = communityCreationDate;
         this.postsPerHour = postsPerHour;
         this.postsPerDay = postsPerDay;
         this.commentsPerHour = commentsPerHour;
@@ -37,8 +41,8 @@ public class RedditStats {
         return activeUsers;
     }
 
-    public Date getCommunityCreation() {
-        return communityCreation;
+    public Date getCommunityCreationDate() {
+        return communityCreationDate;
     }
 
     public double getPostsPerHour() {
@@ -64,4 +68,12 @@ public class RedditStats {
     public long getPoints() {
         return points;
     }
+
+    public String getCommunityCreationDateString() {
+        if(communityCreationDate!=null){
+            return socialStatsDateFormat.format(communityCreationDate);
+        }
+        return null;
+    }
 }
+

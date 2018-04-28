@@ -164,9 +164,9 @@ public class CryptoCompareSocialMediaClient {
         JSONObject general = (JSONObject) data.get(JSON_FIELD_DATA_GENERAL);
         String generalName = (String) general.get(JSON_FIELD_DATA_GENERAL_NAME);
         long generalPoints = (long) general.get(JSON_FIELD_DATA_GENERAL_POINTS);
-        Long timeStampLong = System.currentTimeMillis();
+        Long timeStampMillis = System.currentTimeMillis();
 
-        return new GeneralStats(generalName, generalPoints, timeStampLong);
+        return new GeneralStats(generalName, generalPoints, timeStampMillis);
     }
 
     private FacebookStats getFacebookStats(JSONObject data) {
@@ -273,8 +273,6 @@ public class CryptoCompareSocialMediaClient {
             String codeRespositoryClosedPullIssues = (String) coinRepo.get(JSON_FIELD_DATA_CODEREPOSITORY_CLOSED_PULL_ISSUES);
             String codeRespositoryClosedTotalIssues = (String) coinRepo.get(JSON_FIELD_DATA_CODEREPOSITORY_CLOSED_TOTAL_ISSUES);
 
-
-//            long codeRespositoryForksLong = Long.parseLong(codeRespositoryForks);
             long codeRespositorySizeLong = NumberUtils.isParsable(codeRespositorySize) ? Long.parseLong(codeRespositorySize) : 0;
 
             long codeRespositoryOpenIssuesLong = NumberUtils.isParsable(codeRespositoryOpenIssues) ? Long.parseLong(codeRespositoryOpenIssues) : 0;
@@ -300,8 +298,4 @@ public class CryptoCompareSocialMediaClient {
 
         return new CodeRepositoryStats(codeRespositoryProjectStatsList, codeRespositoryPoints);
     }
-//    public static void main(String[] args) throws Exception {
-//        CryptoCompareSocialMediaClient cryptoCompareSocialMediaClient = new CryptoCompareSocialMediaClient();
-//        cryptoCompareSocialMediaClient.fetch();
-//    }
 }

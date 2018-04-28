@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import io.altanalytics.domain.social.SocialStats;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
@@ -39,6 +40,7 @@ public class InfluxPublisher implements Publisher {
 	private String retentionPolicy;
 
 	private InfluxDB influxDB;
+
 
 	@PostConstruct
 	public void initalise() {
@@ -171,6 +173,54 @@ public class InfluxPublisher implements Publisher {
 			batchPoints.point(point);
 		}
 		influxDB.write(batchPoints);
+	}
+
+	@Override
+	public void publishSocialStats(List<SocialStats> socialStatsList) {
+		BatchPoints batchPoints = BatchPoints
+				.database(database)
+				.retentionPolicy(retentionPolicy)
+				.build();
+
+		for(SocialStats socialStats : socialStatsList) {
+			Point point = Point.measurement("SocialStats" +socialStats.getGeneralStats().getName())
+					.time(socialStats.getGeneralStats().getTimeStampMillis(), TimeUnit.MILLISECONDS)
+					//general stats
+					.addField("currency", socialStats.getGeneralStats().getName())
+					.addField("generalPoints", socialStats.getGeneralStats().getPoints())
+
+					//twitter stats
+					.addField("twitterFollowers", socialStats.getTwitterStats().getFollowers())
+					.addField("twitterFollowing", socialStats.getTwitterStats().getFollowing())
+					.addField("twitterLists", socialStats.getTwitterStats().getLists())
+					.addField("twitterFavourites", socialStats.getTwitterStats().getFavourites())
+					.addField("twitterStatuses", socialStats.getTwitterStats().getStatuses())
+					.addField("twitterAccountCreationDate", socialStats.getTwitterStats().getAccountCreationDateString())
+					.addField("twitterLink", socialStats.getTwitterStats().getLink())
+					.addField("twitterPoints", socialStats.getTwitterStats().getPoints())
+
+					//reddit stats
+					.addField("redditSubscribers", socialStats.getRedditStats().getSubscribers())
+					.addField("redditActiveUsers", socialStats.getRedditStats().getActiveUsers())
+					.addField("redditCommunityCreationDate", socialStats.getRedditStats().getCommunityCreationDateString())
+					.addField("redditPostsPerHour", socialStats.getRedditStats().getPostsPerHour())
+					.addField("redditPostsPerDay", socialStats.getRedditStats().getPostsPerDay())
+					.addField("redditCommentsPerHour", socialStats.getRedditStats().getCommentsPerHour())
+					.addField("redditCommentsPerDay", socialStats.getRedditStats().getCommentsPerDay())
+					.addField("redditLink", socialStats.getRedditStats().getLink())
+					.addField("redditPoints", socialStats.getRedditStats().getPoints())
+
+					//facebook stats
+					.addField("facebookLikes", socialStats.getFacebookStats().getLikes())
+					.addField("facebookIsClosedPage", socialStats.getFacebookStats().isClosed())
+					.addField("facebookTalkingAbout", socialStats.getFacebookStats().getTalkingAbout())
+					.addField("facebookLink", socialStats.getFacebookStats().getLink())
+					.addField("facebookPoints", socialStats.getFacebookStats().getPoints())
+					.build();
+			batchPoints.point(point);
+		}
+		influxDB.write(batchPoints);
+
 	}
 
 }

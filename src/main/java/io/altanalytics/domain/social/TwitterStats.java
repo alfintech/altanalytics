@@ -1,5 +1,7 @@
 package io.altanalytics.domain.social;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -15,6 +17,8 @@ public class TwitterStats {
     private Date accountCreation;
     private long points;
     private String link;
+
+    private DateFormat socialStatsDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     public TwitterStats(long followers, long following, long lists, long favourites, long statuses, Date accountCreation, long points, String link) {
         this.followers = followers;
@@ -49,6 +53,13 @@ public class TwitterStats {
 
     public Date getAccountCreation() {
         return accountCreation;
+    }
+
+    public String getAccountCreationDateString() {
+        if(accountCreation!=null){
+            return socialStatsDateFormat.format(accountCreation);
+        }
+        return null;
     }
 
     public long getPoints() {

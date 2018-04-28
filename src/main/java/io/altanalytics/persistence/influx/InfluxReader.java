@@ -50,7 +50,7 @@ public class InfluxReader implements Reader {
 	@Override
 	public IntervalPrice getAllTimeHigh(String currency) throws Exception {
 
-		String queryTemplate = "SELECT fromCurrency, toCurrency, openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s limit 1";
+		String queryTemplate = "SELECT currency, openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s limit 1";
 		String queryFormatted = String.format(queryTemplate, retentionPolicy, currency, retentionPolicy, currency);
 
 		Query query = new Query(queryFormatted, this.database);
@@ -63,7 +63,7 @@ public class InfluxReader implements Reader {
 	@Override
 	public List<IntervalPrice> getIntervalPrices(Date fromDate, Date toDate, String currency) throws Exception {
 
-		String queryTemplate = "SELECT fromCurrency, toCurrency, openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s WHERE closeTime>=%d AND closeTime<=%d";
+		String queryTemplate = "SELECT currency, openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s WHERE closeTime>=%d AND closeTime<=%d";
 		String queryFormatted = String.format(queryTemplate, retentionPolicy, currency, fromDate.getTime(), toDate.getTime());
 
 		Query query = new Query(queryFormatted, this.database);

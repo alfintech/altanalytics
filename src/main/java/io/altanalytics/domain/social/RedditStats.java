@@ -73,7 +73,7 @@ public class RedditStats {
         if(communityCreationDate!=null){
             return socialStatsDateFormat.format(communityCreationDate);
         }
-        return null;
+        return socialStatsDateFormat.format(new Date(0));
     }
 }
 

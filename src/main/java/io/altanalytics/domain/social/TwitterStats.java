@@ -59,7 +59,7 @@ public class TwitterStats {
         if(accountCreation!=null){
             return socialStatsDateFormat.format(accountCreation);
         }
-        return null;
+        return socialStatsDateFormat.format(new Date(0));
     }
 
     public long getPoints() {

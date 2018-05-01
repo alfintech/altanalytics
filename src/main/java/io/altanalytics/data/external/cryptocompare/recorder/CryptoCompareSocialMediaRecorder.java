@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ import java.util.Map;
 /**
  * Created by Ismail on 26/04/2018.
  */
+@EnableScheduling
+@Component
 public class CryptoCompareSocialMediaRecorder {
 
     private static final Logger LOG = LoggerFactory.getLogger(CryptoCompareSocialMediaRecorder.class);
@@ -26,7 +30,7 @@ public class CryptoCompareSocialMediaRecorder {
     protected Publisher publisher;
 
     @Value("${social.stats.id.list}")
-    protected Integer[] idList;
+    protected String[] idList;
 
     @Value("${social.stats.symbols.list}")
     protected String[] symbolList;
@@ -39,11 +43,13 @@ public class CryptoCompareSocialMediaRecorder {
     @Autowired
     public CryptoCompareSocialMediaClient socialMediaClient;
 
-    private Map<String, Integer> symbolIdMap;
+    private Map<String, String> symbolIdMap;
 
     @PostConstruct
     public void init() throws Exception {
+        System.out.println("trying to intialise.");
         if(active) {
+            LOG.debug("Initialising social media client");
             process();
         }
     }
@@ -66,7 +72,8 @@ public class CryptoCompareSocialMediaRecorder {
 
     @Scheduled(cron = "${social.media.recorder.live.schedule}")
     public void fetchStats() throws Exception {
-        for (Integer id: idList){
+        LOG.debug("Started fetching social stats for coins");
+        for (String id: idList){
             LOG.debug("fetching social stats for coin id: "+id);
             SocialStats stats = socialMediaClient.fetch(id);
             socialStatsList.add(stats);
@@ -78,5 +85,4 @@ public class CryptoCompareSocialMediaRecorder {
 
 
     }
-
 }

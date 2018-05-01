@@ -18,12 +18,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -32,6 +31,7 @@ import java.util.List;
 /**
  * Created by Ismail on 19/04/2018.
  */
+@Component
 public class CryptoCompareSocialMediaClient {
 
     @Autowired
@@ -100,7 +100,7 @@ public class CryptoCompareSocialMediaClient {
     private int numberOfRetryAttempts = 3;
 
 
-    public SocialStats fetch(Integer coinId) throws Exception {
+    public SocialStats fetch(String coinId) throws Exception {
 
         String requestURL = REST_URL_TEMPLATE + coinId;
         HttpGet httpRequest = new HttpGet(requestURL);
@@ -175,7 +175,8 @@ public class CryptoCompareSocialMediaClient {
 
         //Not all coins will have a facebook page, return null if they don't.
         if (facebook.isEmpty() || facebook.size() <= 1 || facebookPoints == 0) {
-            return null;
+            //return dummy facebook stats
+            return new FacebookStats(0,false,0,"N/A",0);
         }
         long facebookLikes = (long) facebook.get(JSON_FIELD_DATA_FACEBOOK_LIKES);
         String facebookIsClosed = (String) facebook.get(JSON_FIELD_DATA_FACEBOOK_IS_CLOSED);
@@ -194,7 +195,8 @@ public class CryptoCompareSocialMediaClient {
 
         //Not all coins will have a twitter page, return null if they don't.
         if (twitter.isEmpty() || twitter.size() <= 1 || twitterPoints==0) {
-            return null;
+            // return dummy twitter stats
+            return new TwitterStats(0,0,0,0,0,new Date(0),0,"N/A");
         }
 
         long twitterFollowers = (long) twitter.get(JSON_FIELD_DATA_TWITTER_FOLLOWERS);
@@ -219,7 +221,8 @@ public class CryptoCompareSocialMediaClient {
 
         //Not all coins will have a reddit page, return null if they don't.
         if (reddit.isEmpty() || reddit.size() <= 1 || redditPoints == 0) {
-            return null;
+            //return dummy stats
+            return new RedditStats(0,0,new Date(0),0,0,0,0,"N/A",0);
         }
 
         long redditSubscribers = (long) reddit.get(JSON_FIELD_DATA_REDDIT_SUBSCRIBERS);

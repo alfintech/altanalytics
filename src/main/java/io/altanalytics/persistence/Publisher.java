@@ -8,6 +8,7 @@ import io.altanalytics.domain.currency.Analytic;
 import io.altanalytics.domain.currency.IntervalPrice;
 import io.altanalytics.domain.currency.PriceDelta;
 import io.altanalytics.domain.market.MarketCap;
+import io.altanalytics.domain.social.SocialStats;
 
 public interface Publisher {
 
@@ -20,5 +21,7 @@ public interface Publisher {
 	void publishMarketCap(MarketCap marketCap) throws IOException;
 
 	void publishPriceDeltas(List<PriceDelta> priceDeltas);
+
+	void publishStats(List<SocialStats> socialStatsList);
 
 }

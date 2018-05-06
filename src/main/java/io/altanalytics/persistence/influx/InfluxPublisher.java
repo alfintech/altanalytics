@@ -18,6 +18,7 @@ import io.altanalytics.domain.currency.Analytic;
 import io.altanalytics.domain.currency.IntervalPrice;
 import io.altanalytics.domain.currency.PriceDelta;
 import io.altanalytics.domain.market.MarketCap;
+import io.altanalytics.domain.social.SocialStats;
 import io.altanalytics.persistence.Publisher;
 
 @Component
@@ -171,6 +172,12 @@ public class InfluxPublisher implements Publisher {
 			batchPoints.point(point);
 		}
 		influxDB.write(batchPoints);
+	}
+
+	@Override
+	public void publishStats(List<SocialStats> socialStatsList) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

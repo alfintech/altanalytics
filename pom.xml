@@ -7,7 +7,7 @@
 	<groupId>io.altanalytics</groupId>
 	<artifactId>altanalytics</artifactId>
 	<version>0.0.1</version>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 
 	<name>altanalytics</name>
 	<description>TBC</description>
@@ -29,14 +29,22 @@
 		<taj.version>0.11</taj.version>
 	</properties>
 
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.4.3.RELEASE</version>
-		<relativePath /> <!-- lookup parent from repository -->
-	</parent>
+	<modules>
+		<module>commons</module>
+		<module>recorders</module>
+		<module>analytics</module>
+		<module>notifier</module>
+		<module>rest-api</module>
+	</modules>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-dependencies</artifactId>
+			<version>1.5.6.RELEASE</version>
+			<type>pom</type>
+			<scope>import</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.influxdb</groupId>
 			<artifactId>influxdb-java</artifactId>
@@ -45,8 +53,8 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<version>1.5.6.RELEASE</version>
 		</dependency>
-
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -104,7 +112,8 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>${junit.version}</scope>
+			<version>${junit.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->

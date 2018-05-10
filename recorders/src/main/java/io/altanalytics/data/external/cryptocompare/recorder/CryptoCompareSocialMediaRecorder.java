@@ -73,10 +73,8 @@ public class CryptoCompareSocialMediaRecorder {
             LOG.debug("fetched social stats for coin id: "+id);
         }
         LOG.debug("Publishing social stats for all coins");
-        publisher.publishStats(socialStatsList);
+        publisher.publishSocialStats(socialStatsList);
         LOG.debug("Finished publishing social stats for all coins");
-
-
     }
 
 }

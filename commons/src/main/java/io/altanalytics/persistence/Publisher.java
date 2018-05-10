@@ -1,14 +1,14 @@
 package io.altanalytics.persistence;
 
-import java.io.IOException;
-import java.util.List;
-
 import io.altanalytics.domain.calendar.CalendarEvent;
 import io.altanalytics.domain.currency.Analytic;
 import io.altanalytics.domain.currency.IntervalPrice;
 import io.altanalytics.domain.currency.PriceDelta;
 import io.altanalytics.domain.market.MarketCap;
 import io.altanalytics.domain.social.SocialStats;
+
+import java.io.IOException;
+import java.util.List;
 
 public interface Publisher {
 
@@ -22,6 +22,6 @@ public interface Publisher {
 
 	void publishPriceDeltas(List<PriceDelta> priceDeltas);
 
-	void publishStats(List<SocialStats> socialStatsList);
+	void publishSocialStats(List<SocialStats> socialStatsList);
 
 }

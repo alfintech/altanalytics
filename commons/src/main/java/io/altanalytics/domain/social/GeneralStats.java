@@ -4,12 +4,12 @@ public class GeneralStats {
 
     private String name;
     private long points;
-    private long timestamp;
+    private long timeStampMillis;
 
-    public GeneralStats(String name, long points, Long timestamp) {
+    public GeneralStats(String name, long points, Long timeStampMillis) {
         this.name = name;
         this.points = points;
-        this.timestamp = timestamp;
+        this.timeStampMillis = timeStampMillis;
     }
 
     public String getName() {
@@ -19,8 +19,8 @@ public class GeneralStats {
     public long getPoints() {
         return points;
     }
-    
-    public long getTimestamp() {
-    	return timestamp;
+
+    public long getTimeStampMillis() {
+        return timeStampMillis;
     }
 }

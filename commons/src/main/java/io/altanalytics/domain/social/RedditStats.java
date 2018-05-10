@@ -1,5 +1,7 @@
 package io.altanalytics.domain.social;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -9,18 +11,20 @@ public class RedditStats {
 
     private long subscribers;
     private long activeUsers;
-    private Date communityCreation;
     private double postsPerHour;
     private double postsPerDay;
     private double commentsPerHour;
     private double commentsPerDay;
     private long points;
     private String link;
+    private Date communityCreationDate;
 
-    public RedditStats(long subscribers, long activeUsers, Date communityCreation, double postsPerHour, double postsPerDay, double commentsPerHour, double commentsPerDay, String link, long points) {
+    private DateFormat socialStatsDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+    public RedditStats(long subscribers, long activeUsers, Date communityCreationDate, double postsPerHour, double postsPerDay, double commentsPerHour, double commentsPerDay, String link, long points) {
         this.subscribers = subscribers;
         this.activeUsers = activeUsers;
-        this.communityCreation = communityCreation;
+        this.communityCreationDate = communityCreationDate;
         this.postsPerHour = postsPerHour;
         this.postsPerDay = postsPerDay;
         this.commentsPerHour = commentsPerHour;
@@ -35,10 +39,6 @@ public class RedditStats {
 
     public long getActiveUsers() {
         return activeUsers;
-    }
-
-    public Date getCommunityCreation() {
-        return communityCreation;
     }
 
     public double getPostsPerHour() {
@@ -63,5 +63,16 @@ public class RedditStats {
 
     public long getPoints() {
         return points;
+    }
+
+    public Date getCommunityCreationDate() {
+        return communityCreationDate;
+    }
+
+    public String getCommunityCreationDateString() {
+        if(communityCreationDate!=null){
+            return socialStatsDateFormat.format(communityCreationDate);
+        }
+        return socialStatsDateFormat.format(new Date(0));
     }
 }

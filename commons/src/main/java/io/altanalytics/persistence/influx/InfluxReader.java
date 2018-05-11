@@ -17,7 +17,6 @@ import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.influxdb.dto.QueryResult.Series;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import io.altanalytics.domain.currency.IntervalPrice;
@@ -51,20 +50,20 @@ public class InfluxReader implements Reader {
 	@Override
 	public IntervalPrice getAllTimeHigh(String currency) throws Exception {
 
-		String queryTemplate = "SELECT currency, openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s limit 1";
+		String queryTemplate = "SELECT openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s limit 1";
 		String queryFormatted = String.format(queryTemplate, retentionPolicy, currency, retentionPolicy, currency);
 
 		Query query = new Query(queryFormatted, this.database);
 		QueryResult result = influxDB.query(query);
 
 		List<Series> series = result.getResults().iterator().next().getSeries();
-		return convertFromResultSeries(series.get(0).getValues().get(0));
+		return convertFromResultSeries(currency, series.get(0).getValues().get(0));
 	}
 
 	@Override
 	public List<IntervalPrice> getIntervalPrices(Date fromDate, Date toDate, String currency) throws Exception {
 
-		String queryTemplate = "SELECT currency, openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s WHERE closeTime>=%d AND closeTime<=%d";
+		String queryTemplate = "SELECT openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s WHERE closeTime>=%d AND closeTime<=%d";
 		String queryFormatted = String.format(queryTemplate, retentionPolicy, currency, fromDate.getTime(), toDate.getTime());
 
 		Query query = new Query(queryFormatted, this.database);
@@ -73,7 +72,25 @@ public class InfluxReader implements Reader {
 		List<Series> series = result.getResults().iterator().next().getSeries();
 
 		if(series!=null) {
-			return convertToList(series.get(0));
+			return convertToList(currency, series.get(0));
+		}
+
+		return Collections.emptyList();
+	}
+	
+	@Override
+	public List<IntervalPrice> getIntervalPrices(Date fromDate, Date toDate, String currency, int interval) throws Exception {
+		
+		String queryTemplate = "SELECT first(openTime), last(closeTime), sum(intervalVolume), first(open), last(close), min(low), max(high), last(dayVolume) FROM %s.IntervalPrice%s WHERE closeTime>=%d AND closeTime<=%d GROUP BY time(%dm) fill(none)";
+		String queryFormatted = String.format(queryTemplate, retentionPolicy, currency, fromDate.getTime(), toDate.getTime(), interval);
+
+		Query query = new Query(queryFormatted, this.database);
+		QueryResult result = influxDB.query(query);
+
+		List<Series> series = result.getResults().iterator().next().getSeries();
+
+		if(series!=null) {
+			return convertToList(currency, series.get(0));
 		}
 
 		return Collections.emptyList();
@@ -82,7 +99,7 @@ public class InfluxReader implements Reader {
 	@Override
 	public IntervalPrice getIntervalPrice(Date date, String currency) throws Exception {
 
-		String queryTemplate = "SELECT currency, openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s WHERE closeTime=%d";
+		String queryTemplate = "SELECT openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s WHERE closeTime=%d";
 		String queryFormatted = String.format(queryTemplate, retentionPolicy, currency, date.getTime());
 
 		Query query = new Query(queryFormatted, this.database);
@@ -91,7 +108,7 @@ public class InfluxReader implements Reader {
 		List<Series> series = result.getResults().iterator().next().getSeries();
 
 		if(series!=null && !series.get(0).getValues().isEmpty()) {
-			return convertFromResultSeries(series.get(0).getValues().get(0));
+			return convertFromResultSeries(currency, series.get(0).getValues().get(0));
 		}
 
 		return null;
@@ -100,7 +117,7 @@ public class InfluxReader implements Reader {
 	@Override
 	public Map<Date, IntervalPrice> getIntervalPrices(List<Date> dates, String currency) throws Exception {
 
-		String queryTemplate = "SELECT currency, openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s WHERE (%s)";
+		String queryTemplate = "SELECT openTime, closeTime, intervalVolume, open, close, low, high, dayVolume FROM %s.IntervalPrice%s WHERE (%s)";
 		String queryFormatted = String.format(queryTemplate, retentionPolicy, currency, toEpochClauses("closeTime", dates));
 
 		Query query = new Query(queryFormatted, this.database);
@@ -109,7 +126,7 @@ public class InfluxReader implements Reader {
 		List<Series> series = result.getResults().iterator().next().getSeries();
 
 		if(series!=null) {
-			return convertToMap(series.get(0));
+			return convertToMap(currency, series.get(0));
 		}
 
 		return Collections.emptyMap();
@@ -129,13 +146,13 @@ public class InfluxReader implements Reader {
 		return buffer.toString();
 	}
 
-	public static List<IntervalPrice> convertToList(Series series) {
+	public static List<IntervalPrice> convertToList(String currency, Series series) {
 
 		List<IntervalPrice> results = new ArrayList<IntervalPrice>();
 
 		for(List<Object> entry : (List<List<Object>>) series.getValues()) {
 
-			IntervalPrice intervalPrice = convertFromResultSeries(entry);
+			IntervalPrice intervalPrice = convertFromResultSeries(currency, entry);
 			results.add(intervalPrice);
 		}
 
@@ -143,13 +160,13 @@ public class InfluxReader implements Reader {
 
 	}
 
-	public static Map<Date, IntervalPrice> convertToMap(Series series) {
+	public static Map<Date, IntervalPrice> convertToMap(String currency, Series series) {
 
 		Map<Date, IntervalPrice> results = new HashMap<Date, IntervalPrice>();
 
 		for(List<Object> entry : (List<List<Object>>) series.getValues()) {
 
-			IntervalPrice intervalPrice = convertFromResultSeries(entry);
+			IntervalPrice intervalPrice = convertFromResultSeries(currency, entry);
 			results.put(intervalPrice.getCloseTime(), intervalPrice);
 		}
 
@@ -157,24 +174,23 @@ public class InfluxReader implements Reader {
 
 	}
 
-	public static IntervalPrice convertFromResultSeries(List<Object> entry) {
+	public static IntervalPrice convertFromResultSeries(String currency, List<Object> entry) {
 
-		String currency = (String) entry.get(1);
 
-		long openTimeMs = ((Double) entry.get(2)).longValue();
-		long closeTimeMs = ((Double) entry.get(3)).longValue();
+		long openTimeMs = ((Double) entry.get(1)).longValue();
+		long closeTimeMs = ((Double) entry.get(2)).longValue();
 
 		Date openTime = new Date(openTimeMs);
 		Date closeTime = new Date(closeTimeMs);
 
-		BigDecimal intervalVolume = new BigDecimal((Double) entry.get(4));
-		BigDecimal open = new BigDecimal((Double) entry.get(5));
-		BigDecimal close = new BigDecimal((Double) entry.get(6));
-		BigDecimal low = new BigDecimal((Double) entry.get(7));
-		BigDecimal high = new BigDecimal((Double) entry.get(8));
-		BigDecimal dayVolume = new BigDecimal((Double) entry.get(9));
+		BigDecimal intervalVolume = new BigDecimal((Double) entry.get(3));
+		BigDecimal open = new BigDecimal((Double) entry.get(4));
+		BigDecimal close = new BigDecimal((Double) entry.get(5));
+		BigDecimal low = new BigDecimal((Double) entry.get(6));
+		BigDecimal high = new BigDecimal((Double) entry.get(7));
+		BigDecimal dayVolume = new BigDecimal((Double) entry.get(8));
 
-		return new IntervalPrice(currency, openTime, closeTime, intervalVolume, open, close, low, high, dayVolume);
+		return new IntervalPrice(currency, openTime, closeTime, open, close, low, high, intervalVolume, dayVolume);
 	}
 
 }

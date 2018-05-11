@@ -1,12 +1,11 @@
 package io.altanalytics.persistence.influx;
 
-import io.altanalytics.domain.calendar.CalendarEvent;
-import io.altanalytics.domain.currency.Analytic;
-import io.altanalytics.domain.currency.IntervalPrice;
-import io.altanalytics.domain.currency.PriceDelta;
-import io.altanalytics.domain.market.MarketCap;
-import io.altanalytics.domain.social.SocialStats;
-import io.altanalytics.persistence.Publisher;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
@@ -14,10 +13,13 @@ import org.influxdb.dto.Point;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import io.altanalytics.domain.calendar.CalendarEvent;
+import io.altanalytics.domain.currency.Analytic;
+import io.altanalytics.domain.currency.IntervalPrice;
+import io.altanalytics.domain.currency.PriceDelta;
+import io.altanalytics.domain.market.MarketCap;
+import io.altanalytics.domain.social.SocialStats;
+import io.altanalytics.persistence.Publisher;
 
 @Component
 public class InfluxPublisher implements Publisher {
@@ -59,7 +61,6 @@ public class InfluxPublisher implements Publisher {
 		for(IntervalPrice price : prices) {
 			Point point = Point.measurement("IntervalPrice" +price.getCurrency())
 					.time(price.getCloseTime().getTime(), TimeUnit.MILLISECONDS)
-					.addField("currency", price.getCurrency())
 					.addField("dayVolume", price.getDayVolume())
 					.addField("intervalVolume", price.getIntervalVolume())
 					.addField("high", price.getHigh().doubleValue())
@@ -88,7 +89,6 @@ public class InfluxPublisher implements Publisher {
 		for(Analytic analytic : analytics) {
 			Point point = Point.measurement("Analytic" +analytic.getCurrency())
 					.time(analytic.getDate().getTime(), TimeUnit.MILLISECONDS)
-					.addField("currency", analytic.getCurrency())
 					.addField("intervalVolume", analytic.getIntervalVolume())
 					.addField("percentageAllTimeHigh", analytic.getPercentageAllTimeHigh())
 					.addField("percentageVolume", analytic.getPercentageVolume())
@@ -113,7 +113,6 @@ public class InfluxPublisher implements Publisher {
 			for(String currency : event.getCurrencies()) {
 				Point point = Point.measurement("CalendarEvent" +currency)
 						.time(event.getEventDate().getTime(), TimeUnit.MILLISECONDS)
-						.addField("currency", currency)
 						.addField("description", event.getDescription())
 						.addField("eventId", event.getEventId())
 						.addField("title", event.getTitle())
@@ -156,7 +155,6 @@ public class InfluxPublisher implements Publisher {
 		for(PriceDelta priceDelta : priceDeltas) {
 			Point point = Point.measurement("PriceDelta" +priceDelta.getCurrency())
 					.time(priceDelta.getAnalyticDate().getTime(), TimeUnit.MILLISECONDS)
-					.addField("currency", priceDelta.getCurrency())
 					.addField("fiveMinute", priceDelta.getFiveMinuteDelta())
 					.addField("fifteenMinute", priceDelta.getFifteenMinuteDelta())
 					.addField("thirtyMinute", priceDelta.getThirtyMinuteDelta())

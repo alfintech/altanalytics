@@ -16,4 +16,6 @@ public interface Reader {
 
 	IntervalPrice getIntervalPrice(Date date, String currency) throws Exception;
 
+	List<IntervalPrice> getIntervalPrices(Date fromDate, Date toDate, String currency, int minuteIntervals) throws Exception;
+
 }

@@ -18,9 +18,10 @@ public class WebController {
 	@Autowired
 	private InfluxReader reader;
 
-    @GetMapping("/")
-	public String greeting(Map<String, Object> model) {
-        model.put("name", "amoudster");
-        return "greeting";
+    @GetMapping("/currency")
+	public String currency(Map<String, Object> model, String currency) {
+        model.put("currency", currency);
+        model.put("decimals", 6);
+        return "currency";
     }
 }

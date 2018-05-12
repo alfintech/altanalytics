@@ -1,0 +1,39 @@
+
+	
+	<script th:inline="javascript">
+	
+	var restURL = '../api/prices?currency=';
+	var currency = /*[[${currency}]]*/;
+	var decimals = /*[[${decimals}]]*/;
+	
+	$.getJSON(restURL+currency, function (data) {
+
+    // Create the chart
+    Highcharts.stockChart('annotatedCurrencyChart', {
+
+        rangeSelector: {
+            selected: 1
+        },
+
+        title: {
+            text: currency + ' Price'
+        },
+
+        scrollbar: {
+            enabled: false
+        },
+
+		labels: {
+        		    formatter: function () {
+            	    return parseFloat(this.value);
+        	   	}
+        },
+        series: [{
+            name: currency + ' Price',
+            data: data,
+        }]
+    });
+});
+
+
+		</script>
